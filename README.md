@@ -82,3 +82,4 @@ types/
 - [MongoDB Setup Guide](docs/MONGODB_SETUP.md)
 - [MongoDB Migration Guide](docs/MONGODB_MIGRATION.md)
 - [API Reference](docs/API_REFERENCE.md)
+- [Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md)
