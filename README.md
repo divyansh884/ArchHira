@@ -1,6 +1,6 @@
 # ArchHira
 
-PRs Welcome
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
 The operating platform for **Architecture Department venue booking workflows** — designed to manage authentication, booking, approvals, and admin operations in one system.
 
