@@ -1,82 +1,200 @@
-# Hira Hall & Guest House Booking System
+# ArchHira
 
-A Next.js (App Router) booking system for **Hira Hall** (first/second half or full day) and **Guest House** (full day only), with conflict validation and an admin approval workflow.
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
-## Tech Stack
+The operating platform for **Architecture Department venue booking workflows** — designed to manage authentication, booking, approvals, and admin operations in one system.
 
-- **Next.js 15** (App Router), **TypeScript**, **Tailwind CSS**
-- **Lucide React** (icons), **Zod** (validation), **react-hook-form** + **@hookform/resolvers**
-- **react-day-picker** + **date-fns** (calendar and dates)
-- **MongoDB** for global, persistent storage (optional; in-memory fallback if not configured)
+## 📖 About
 
-## Setup
+ArchHira is a Next.js-based booking and operations platform for:
+
+- **Hira Hall** bookings
+- **Architecture Hall** bookings
+- **Guest House** bookings (date-range and room-capacity flow)
+
+It replaces fragmented manual processes with a unified system including OTP-based auth, conflict-aware booking, admin approval workflows, and email notifications.
+
+## Key Problems Solved
+
+- **Scheduling conflicts** — Slot/date conflict checks for halls and guest-house capacity logic
+- **Manual approval overhead** — Structured admin dashboard for review and status updates
+- **Authentication friction** — OTP-assisted login and password reset flows
+- **Data inconsistency** — Centralized booking state with MongoDB persistence option
+- **Operational visibility gap** — Dedicated admin views and booking detail workflows
+
+## Who Is This For?
+
+- **Faculty/Staff/Student organizers** requesting halls and guest-house stays
+- **Department admins** managing approvals and rejections
+- **System maintainers** extending booking, auth, and workflow capabilities
+
+## ✨ Features
+
+### Authentication & Session Layer ✅
+
+- User registration with hashed passwords
+- OTP-based login verification
+- OTP resend and password-reset via OTP
+- Session check (`/api/auth/me`) and logout flow
+
+### Booking Engine ✅
+
+- Multi-venue support: `HIRA_HALL`, `ARCHITECTURE_HALL`, `GUEST_HOUSE`
+- Slot system for halls: `FIRST_HALF`, `SECOND_HALF`, `FULL_DAY`
+- Guest-house date-range and room availability checks
+- Booking lifecycle: `PENDING`, `APPROVED`, `REJECTED`
+- Approval date policy enforcement (minimum 7-day lead time)
+
+### Admin Operations ✅
+
+- Admin login endpoint and admin dashboard
+- Super-admin-only add-admin capability
+- First super admin seeded via environment variables
+- Approval/rejection email notifications
+
+### Testing & Quality 🟡
+
+- Validation scripts available (`npm run lint`, `npm run build`)
+- Detailed testing strategy and status documentation present
+- Automated unit/integration test suites documented but not yet implemented
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- npm
+
+### Installation
 
 ```bash
 npm install
+```
+
+### Configure Environment
+
+Create `.env.local` from `.env.example`:
+
+```env
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017
+# MONGODB_DB_NAME=hira-hall
+
+# First admin (super admin)
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your-secure-password
+
+# Optional SMTP
+# SMTP_HOST=smtp.gmail.com
+# SMTP_PORT=587
+# SMTP_USER=your@gmail.com
+# SMTP_PASS=your-app-password
+# SMTP_FROM=noreply@yourdomain.com
+```
+
+### Run the Project
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open: [http://localhost:3000](http://localhost:3000)
 
-### MongoDB (global storage)
+## 🔐 Access Model
 
-To persist bookings in **MongoDB** (shared across restarts and instances), add to `.env.local`:
+- Public auth endpoints: register/login/verify/resend/forgot/reset
+- Authenticated user required: booking APIs, `/api/auth/me`, `/api/auth/logout`
+- MongoDB required: admin APIs (`/api/admin/login`, `/api/admin/add`)
+- Super-admin restriction: only super admin can add additional admins
 
-```env
-MONGODB_URI=mongodb://localhost:27017
-# Or Atlas: mongodb+srv://user:pass@cluster.mongodb.net/
-MONGODB_DB_NAME=hira-hall   # optional; default is hira-hall
-```
+## 🛠️ Tech Stack
 
-- If `MONGODB_URI` is set, all bookings are stored in the `bookings` collection (global).
-- If not set, the app uses in-memory storage (data is lost on restart).
+- **Frontend/Server**: Next.js 15 (App Router), React 19, TypeScript
+- **Validation & Forms**: Zod, react-hook-form, @hookform/resolvers
+- **UI/Date**: Tailwind CSS, Lucide React, react-day-picker, date-fns
+- **Data**: MongoDB (with in-memory fallback for bookings where applicable)
+- **Email**: Nodemailer
 
-## Features
+## 🏗️ Architecture Highlights
 
-- **Landing**: Two glassmorphism cards — “Book Hira Hall” and “Book Guest House”.
-- **Calendar**: Color-coded dates — Green (available), Yellow (partially booked – Hall only), Red (booked).
-- **Booking form**: Name, Designation, Email, Purpose; for Hall, slot selection (First Half / Second Half / Full Day) with conflict rules.
-- **Admin** (requires MongoDB): Login with **email + password**. Dashboard with **date filter** and **separate tables for Hira Hall and Guest House**. Only the **super admin** (first admin, from env) can **add other admins**. **Approve** only when request date is **at least 7 days from today**; **Reject** anytime. On **approve**: acceptance email sent to applicant; on **reject**: rejection email sent.
+### Layered Design
 
-## Admin
+- **API Layer**: App Router handlers under `app/api/**`
+- **Business Logic Layer**: conflict and rule enforcement in `lib/booking-logic.ts`
+- **Validation Layer**: shared Zod schemas in `lib/validations.ts`
+- **Persistence Layer**: MongoDB-backed auth/admin; bookings via store abstraction
 
-- **URL**: `/admin` (login), `/admin/dashboard` (after login).
-- **First admin**: Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env.local`. The first admin is created automatically and is the **super admin** (only they can add more admins).
-- **Emails**: Set SMTP vars in `.env.local` (see `.env.example`) to send acceptance/rejection emails to applicants.
+### Core Modules
 
-## Project Structure
+- **Auth Module** — OTP lifecycle, password reset, session flows
+- **Bookings Module** — create/list/update/delete + conflict checks
+- **Admin Module** — login + super-admin-controlled admin provisioning
 
-```
+## 📁 Project Structure
+
+```text
 app/
-  page.tsx              # Landing
-  book/hall/            # Hira Hall booking
-  book/guest-house/     # Guest House booking
-  admin/                # Admin login
-  admin/dashboard/      # Pending requests table
-  api/bookings/         # GET all, POST new
-  api/bookings/[id]/    # PATCH approve/reject
-  api/admin/login/      # POST login (email + password)
-  api/admin/add/        # POST add admin (super admin only)
-  lib/admins.ts         # Admin CRUD, super-admin seed
-  lib/email.ts          # Acceptance/rejection emails (Nodemailer)
+  api/auth/*                  # Register/login/OTP/password reset/session/logout
+  api/bookings/route.ts       # List/create bookings
+  api/bookings/[id]/route.ts  # CRUD and status updates by ID
+  api/admin/login/route.ts    # Admin login
+  api/admin/add/route.ts      # Add admin (super admin only)
+  page.tsx                    # Auth entry
+  dashboard/page.tsx          # Main user dashboard
+  book/hall/page.tsx
+  book/architecture-hall/page.tsx
+  book/guest-house/page.tsx
+  admin/page.tsx
+  admin/dashboard/page.tsx
+  admin/booking/[id]/page.tsx
+
 components/
-  booking-calendar.tsx  # Calendar with availability
-  booking-form.tsx       # Request form (Zod + RHF)
+  booking-calendar.tsx
+  booking-form.tsx
+  guest-house-booking-form.tsx
+  LogoutButton.tsx
+
 lib/
-  booking-logic.ts      # Slots, conflicts, canApproveByDate
-  validations.ts        # Zod schemas
-  mongodb.ts            # MongoDB connection (cached)
-  store-server.ts       # Bookings store (MongoDB or in-memory)
-types/
-  index.ts              # Booking, Slot, Status enums
+  auth.ts
+  admins.ts
+  booking-logic.ts
+  store-server.ts
+  mongodb.ts
+  validations.ts
+  email.ts
 ```
 
-## Rules (summary)
+## ✅ Validation Commands
 
-- **Hira Hall**: First Half, Second Half, or Full Day. Full Day blocks both halves; one half blocks the other and Full Day for that date.
-- **Guest House**: Full Day only.
-- **Admin**: Approve only when request date is at least 7 days from today.
+Run from repository root:
 
-## Documentation
+```bash
+npm run lint
+npm run build
+```
+
+## 📚 Documentation
 
 - [MongoDB Setup Guide](docs/MONGODB_SETUP.md)
+- [MongoDB Migration Guide](docs/MONGODB_MIGRATION.md)
+- [API Reference](docs/API_REFERENCE.md)
+- [Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md)
+- [Testing Suite Documentation](docs/TESTING.md)
+- [Testing Status Report](docs/TEST_RESULTS.md)
+
+## 🎯 Roadmap Snapshot
+
+- ✅ Authentication + OTP flows
+- ✅ Multi-venue booking APIs and UI
+- ✅ Admin dashboard and approval lifecycle
+- 🟡 Automated test suite implementation and CI hardening
+- 📋 Session hardening, rate-limiting, and operational observability improvements
+
+## 🤝 Contributing
+
+Contributions are welcome. Please keep changes aligned with:
+
+- Existing module boundaries (`auth`, `bookings`, `admin`)
+- Shared validation and typing patterns
+- Root validation checks (`npm run lint`, `npm run build`)
+- Documentation updates for behavior changes
