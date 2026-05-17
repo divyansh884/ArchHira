@@ -203,7 +203,8 @@ export async function GET() {
     return NextResponse.json({ status: "unhealthy", database: "mongodb", reason: "not configured" }, { status: 503 });
   }
   try {
-    await getDb().then((db) => db.command({ ping: 1 }));
+    const db = await getDb();
+    await db.command({ ping: 1 });
     return NextResponse.json({ status: "healthy", database: "mongodb" });
   } catch {
     return NextResponse.json({ status: "unhealthy", database: "mongodb" }, { status: 503 });
@@ -259,7 +260,8 @@ MONGODB_DB_NAME=hira-hall
 import { getDb, isMongoConfigured } from "@/lib/mongodb";
 
 console.log("mongo configured:", isMongoConfigured());
-await getDb().then((db) => db.command({ ping: 1 }));
+const db = await getDb();
+await db.command({ ping: 1 });
 ```
 
 ### Admin Login Fails
