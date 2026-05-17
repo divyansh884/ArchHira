@@ -76,3 +76,7 @@ types/
 - **Hira Hall**: First Half, Second Half, or Full Day. Full Day blocks both halves; one half blocks the other and Full Day for that date.
 - **Guest House**: Full Day only.
 - **Admin**: Approve only when request date is at least 7 days from today.
+
+## Documentation
+
+- [MongoDB Setup Guide](docs/MONGODB_SETUP.md)
